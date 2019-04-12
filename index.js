@@ -33,7 +33,6 @@
 
 	var getUserId = (req, callback) => {
 		db.all("SELECT userId FROM sessions WHERE token = ?", req.token, (err, result) => {
-			console.log(result)
 			if (err) {
 				callback(null, err)
 				return
@@ -178,6 +177,151 @@
 	app.use('/secure', checkLogin)
 	app.get("/secure", (req, res) => {
 		res.send("Hello World")
+	})
+
+	app.get("/api/stats", (req, res) => {
+		db.all("SELECT users.id AS id, users.firstname AS firstname, users.lastname AS lastname, users.nickname AS nickname, users.kills AS kills, killers.id AS killer_id, killers.firstname AS killer_firstname, killers.lastname AS killer_lastname, killers.kills AS killer_kills, killers.killedBy AS killer_killedBy FROM users LEFT JOIN users killers ON users.killedBy = killers.id ORDER BY users.killedby, users.kills DESC;", (err, rows) => {
+			if (err) {
+				console.log(err)
+				res.status(500).json({
+					status: "error",
+					error: "internal server error",
+				})
+				return
+			}
+			let resp = []
+			for (i in rows) {
+				let r = rows[i]
+				let user = {
+					firstname: r.firstname,
+					lastname: r.lastname,
+					nickname: r.nickname,
+					kills: r.kills,
+					id: r.id,
+					dead: !(r.killer_id == null),
+					killer: {
+						fistname: r.killer_firstname,
+						lastname: r.killer_lastname,
+						nickname: r.killer_nickname,
+						id: r.killer_id,
+						kills: r.killer_kills,
+						dead: !(r.killer_killedBy == -1)
+					}
+				}
+				resp.push(user)
+			}
+			res.json(resp)
+		})
+	})
+
+	app.use('/api/kill', checkLogin)
+	app.post("/api/kill", (req, res) => {
+		getUserId(req, (id, err) => {
+			let player = req.body.player
+			if (!req.body.player) {
+				res.status(400).json({
+					status: "error",
+					error: "missing parameters"
+				})
+				return
+			}
+			db.all("SELECT killedBy FROM users WHERE id = ?", player, (err, killedBy) => {
+				if (err) {
+					console.log(err)
+					res.status(500).json({
+						status: "error",
+						error: "internal server error",
+					})
+					return
+				}
+				if (killedBy.length == 0) {
+					res.status(400).json({
+						status: "error",
+						error: "player not found"
+					})
+					return
+				} else if (killedBy[0].killedBy != -1) {
+					res.status(410).json({
+						status: "error",
+						error: "player already dead"
+					})
+					return
+				}
+				db.run("UPDATE users SET killedBy = ? WHERE id = ?", [id, player], (result, err) => {
+					if (err) {
+						console.log(err)
+						res.status(500).json({
+							status: "error",
+							error: "internal server error",
+						})
+						return
+					}
+					db.run("UPDATE users SET kills = kills + 1 WHERE id = ?", id, (result, err) => {
+						if (err) {
+							console.log(err)
+							res.json({
+								status: "ok",
+								warning: "kill count not updated"
+							})
+							return
+						}
+
+						res.json({
+							status: "ok"
+						})
+					})
+				})
+			})
+		})
+	})
+
+	app.get("/api/auth/me", (req, res) => {
+		getUserId(req, (id, err) => {
+			if (err) {
+				console.log(err)
+				res.status(500).json({
+					status: "error",
+					error: "internal server error",
+				})
+				return
+			}
+
+			if (id == -1) {
+				res.status(401).json({
+					status: "error",
+					error: "signed out",
+				})
+			} else {
+				db.all("SELECT users.id AS id, users.firstname AS firstname, users.lastname AS lastname, users.nickname AS nickname, users.kills AS kills, killers.id AS killer_id, killers.firstname AS killer_firstname, killers.lastname AS killer_lastname, killers.kills AS killer_kills, killers.killedBy AS killer_killedBy FROM users LEFT JOIN users killers ON users.killedBy = killers.id WHERE users.id = ?", id, (err, rows) => {
+					if (err) {
+						console.log(err)
+						res.status(500).json({
+							status: "error",
+							error: "internal server error",
+						})
+						return
+					}
+
+					let r = rows[0]
+					res.json({
+						firstname: r.firstname,
+						lastname: r.lastname,
+						nickname: r.nickname,
+						kills: r.kills,
+						id: r.id,
+						dead: !(r.killer_id == null),
+						killer: {
+							fistname: r.killer_firstname,
+							lastname: r.killer_lastname,
+							nickname: r.killer_nickname,
+							id: r.killer_id,
+							kills: r.killer_kills,
+							dead: !(r.killer_killedBy == -1)
+						}
+					})
+				})
+			}
+		})
 	})
 
 	app.post("/api/auth/logout", (req, res) => {
