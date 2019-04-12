@@ -170,15 +170,6 @@
 		}
 	})
 
-	app.get("/", (req, res) => {
-		res.send("Hello World")
-	})
-
-	app.use('/secure', checkLogin)
-	app.get("/secure", (req, res) => {
-		res.send("Hello World")
-	})
-
 	app.get("/api/stats", (req, res) => {
 		db.all("SELECT users.id AS id, users.firstname AS firstname, users.lastname AS lastname, users.nickname AS nickname, users.kills AS kills, killers.id AS killer_id, killers.firstname AS killer_firstname, killers.lastname AS killer_lastname, killers.kills AS killer_kills, killers.killedBy AS killer_killedBy FROM users LEFT JOIN users killers ON users.killedBy = killers.id ORDER BY users.killedby, users.kills DESC;", (err, rows) => {
 			if (err) {
@@ -400,6 +391,9 @@
 			})
 		})
 	})
+
+	app.use('/', express.static('site'))
+	app.use('/public', express.static('public'))
 
 	app.listen(port, () => console.log(`Fork game listening on port ${port}!`))
 })()
