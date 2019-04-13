@@ -6,7 +6,7 @@
 	app.use(bodyParser.urlencoded({ extended: false }))
 	app.use(bodyParser.json())
 	app.use(cookieParser());
-	const port = 3000
+	const port = process.env.PORT || 1337;
 
 	const request = require('request-promise').defaults({ jar: true })
 
