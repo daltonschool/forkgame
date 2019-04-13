@@ -171,7 +171,7 @@
 	})
 
 	app.get("/api/stats", (req, res) => {
-		db.all("SELECT users.id AS id, users.firstname AS firstname, users.lastname AS lastname, users.nickname AS nickname, users.kills AS kills, killers.id AS killer_id, killers.firstname AS killer_firstname, killers.lastname AS killer_lastname, killers.kills AS killer_kills, killers.killedBy AS killer_killedBy FROM users LEFT JOIN users killers ON users.killedBy = killers.id ORDER BY users.killedby, users.kills DESC;", (err, rows) => {
+		db.all("SELECT users.id AS id, users.firstname AS firstname, users.lastname AS lastname, users.nickname AS nickname, users.kills AS kills, killers.id AS killer_id, killers.firstname AS killer_firstname, killers.nickname AS killer_nickname, killers.lastname AS killer_lastname, killers.kills AS killer_kills, killers.killedBy AS killer_killedBy FROM users LEFT JOIN users killers ON users.killedBy = killers.id ORDER BY users.killedby, users.kills DESC;", (err, rows) => {
 			if (err) {
 				console.log(err)
 				res.status(500).json({
@@ -191,7 +191,7 @@
 					id: r.id,
 					dead: !(r.killer_id == null),
 					killer: {
-						fistname: r.killer_firstname,
+						firstname: r.killer_firstname,
 						lastname: r.killer_lastname,
 						nickname: r.killer_nickname,
 						id: r.killer_id,
@@ -202,6 +202,33 @@
 				resp.push(user)
 			}
 			res.json(resp)
+		})
+	})
+
+	app.post("/api/findSomeoneToKill", (req, res) => {
+		let query = req.body.query
+		if (!query) {
+			res.status(400).json({
+				status: "error",
+				error: "missing parameters"
+			})
+			return
+		}
+		if (query == "") {
+			res.json([])
+			return
+		}
+		let sqlQuery = `%${query}%`
+		db.all("SELECT id, firstname, nickname, lastname FROM users WHERE killedBy = -1 AND (firstname LIKE ? OR lastname LIKE ? OR nickname LIKE ?)", [sqlQuery, sqlQuery, sqlQuery], (err, rows) => {
+			if (err) {
+				console.log(err)
+				res.status(500).json({
+					status: "error",
+					error: "internal server error",
+				})
+				return
+			}
+			res.json(rows)
 		})
 	})
 

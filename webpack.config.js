@@ -1,7 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 
 module.exports = {
@@ -23,9 +22,11 @@ module.exports = {
 				exclude: /node_modules/,
 				use:
 				{
-					loader: "buble-loader",
-					query: {
-						jsx: "h"
+					loader: "babel-loader",
+					options: {
+						"plugins": [
+							["@babel/plugin-transform-react-jsx", { "pragma": "preact.h" }]
+						],
 					}
 				}
 			}, {
@@ -43,9 +44,10 @@ module.exports = {
 	plugins: [
 		new HtmlWebpackPlugin({
 			template: require('html-webpack-template'),
+			title: 'Fork Game',
 			appMountId: 'app',
 			inject: false,
-			links: ["https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/flatly/bootstrap.min.css"]
+			links: ["https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/flatly/bootstrap.min.css", "https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"]
 		}),
 		new MiniCssExtractPlugin()
 	],
@@ -57,11 +59,6 @@ module.exports = {
 	},
 	optimization: {
 		minimizer: [
-			new UglifyJsPlugin({
-				cache: true,
-				parallel: true,
-				sourceMap: true // set to true if you want JS source maps
-			}),
 			new OptimizeCSSAssetsPlugin({})
 		]
 	},

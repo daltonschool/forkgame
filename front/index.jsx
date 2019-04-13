@@ -1,5 +1,6 @@
-import { h, render } from 'preact'
+import preact from 'preact'
+import 'preact/devtools'
 
 import App from './Components/App.jsx'
 
-render(<App />, document.body);
+preact.render(<App />, document.body);
