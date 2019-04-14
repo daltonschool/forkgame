@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Fork Game Setup</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/flatly/bootstrap.min.css">
+</head>
+
+<body>
+	<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+		<a class="navbar-brand" href="#">Fork Game</a>
+	</nav>
+	<div class="jumbotron jumbotron-fluid">
+		<div class="container">
+			<h1 class="display-4">Setup</h1>
+			<p class="lead">This is the setup page for the fork game. Use your dalton ID to sign in.</p>
+		</div>
+	</div>
+	<div class="container">
+		<form action="/setup" method="POST">
+			<div class="form-group row">
+				<label for="username" class="col-4 col-form-label">Username</label>
+				<div class="col-8">
+					<div class="input-group">
+						<input id="username" name="username" placeholder="cXXyy" type="text"
+							aria-describedby="usernameHelpBlock" required="required" class="form-control">
+						<div class="input-group-append">
+							<div class="input-group-text">@dalton.org</div>
+						</div>
+					</div>
+					<span id="usernameHelpBlock" class="form-text text-muted">Your dalton username</span>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="password" class="col-4 col-form-label">Password</label>
+				<div class="col-8">
+					<input id="password" name="password" placeholder="superSecret1!" type="password"
+						aria-describedby="passwordHelpBlock" required="required" class="form-control">
+					<span id="passwordHelpBlock" class="form-text text-muted">Your dalton password</span>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="grade" class="col-4 col-form-label">Grade</label>
+				<div class="col-8">
+					<select id="grade" name="grade" aria-describedby="gradeHelpBlock" required="required"
+						class="custom-select">
+						<option value="Kindergarden">Kindergarden</option>
+						<option value="First">First</option>
+						<option value="Second">Second</option>
+						<option value="Third">Third</option>
+						<option value="Fourth">Fourth</option>
+						<option value="Fifth">Fifth</option>
+						<option value="Sixth">Sixth</option>
+						<option value="Seventh">Seventh</option>
+						<option value="Eighth">Eighth</option>
+						<option value="Ninth">Ninth</option>
+						<option value="Tenth">Tenth</option>
+						<option value="Eleventh">Eleventh</option>
+						<option value="Twelfth">Twelfth</option>
+					</select>
+					<span id="gradeHelpBlock" class="form-text text-muted">The grade that will be playing</span>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="offset-4 col-8">
+					<button name="submit" type="submit" class="btn btn-primary">Let's go!</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</body>
+
+</html>
